@@ -188,4 +188,4 @@ Toute réutilisation doit citer l’auteur.
 
 ---
 
-⭐ Si ce projet vous a aidé, n’hésitez pas à lui mettre une étoile sur GitHub !
+
