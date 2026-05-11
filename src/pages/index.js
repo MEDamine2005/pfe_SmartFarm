@@ -4,3 +4,8 @@ export { default as IrrigationPage } from './IrrigationPage';
 export { default as WeatherPage } from './WeatherPage';
 export { default as ChatPage } from './ChatPage';
 export { default as SettingsPage } from './SettingsPage';
+export { default as LoginPage } from './LoginPage';
+export { default as AdminReportsPage } from './AdminReportsPage';
+export { default as AdminUsersPage } from './AdminUsersPage';
+export { default as AdminIotPage } from './AdminIotPage';
+export { default as AdminIrrigationPage } from './AdminIrrigationPage';

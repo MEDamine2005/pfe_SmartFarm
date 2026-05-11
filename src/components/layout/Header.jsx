@@ -1,13 +1,54 @@
-import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React from 'react';
-import { Bell, RefreshCw, User, Wifi, WifiOff } from 'lucide-react';
+import { Bell, LogOut, RefreshCw, User, Wifi, WifiOff } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 const Header = () => {
-    const { alerts, refreshSensorData, isLoadingSensors } = useApp();
+    const { alerts, refreshSensorData, isLoadingSensors, currentUser, logout } = useApp();
     const unreadCount = alerts.filter(a => !a.read).length;
     const [isOnline] = React.useState(true);
-    return (_jsxs("header", { className: "h-16 bg-slate-800/50 backdrop-blur-xl border-b border-slate-700/50 flex items-center justify-between px-6 sticky top-0 z-30", children: [_jsx("div", { className: "flex items-center gap-3", children: _jsx("div", { className: `flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${isOnline
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : 'bg-red-500/20 text-red-400'}`, children: isOnline ? (_jsxs(_Fragment, { children: [_jsx(Wifi, { className: "w-4 h-4" }), _jsx("span", { children: "Connect\u00E9" })] })) : (_jsxs(_Fragment, { children: [_jsx(WifiOff, { className: "w-4 h-4" }), _jsx("span", { children: "Hors ligne" })] })) }) }), _jsxs("div", { className: "flex items-center gap-4", children: [_jsx("button", { onClick: refreshSensorData, disabled: isLoadingSensors, className: "p-2 rounded-lg bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-600/50 transition-all disabled:opacity-50", title: "Actualiser les donn\u00E9es", children: _jsx(RefreshCw, { className: `w-5 h-5 ${isLoadingSensors ? 'animate-spin' : ''}` }) }), _jsxs("button", { className: "relative p-2 rounded-lg bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-600/50 transition-all", children: [_jsx(Bell, { className: "w-5 h-5" }), unreadCount > 0 && (_jsx("span", { className: "absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-white text-xs font-bold rounded-full flex items-center justify-center", children: unreadCount }))] }), _jsxs("button", { className: "flex items-center gap-3 p-2 rounded-lg hover:bg-slate-700/50 transition-all", children: [_jsx("div", { className: "w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center", children: _jsx(User, { className: "w-4 h-4 text-white" }) }), _jsx("span", { className: "text-sm font-medium text-slate-300 hidden md:block", children: "Fermier" })] })] })] }));
+    return (
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-700/50 bg-slate-800/50 px-4 backdrop-blur-xl md:px-6">
+            <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-slate-900/60 p-1 md:hidden">
+                    <img src="/logo1.png" alt="Smart Farm" className="h-full w-full object-contain object-center" />
+                </div>
+                <div className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-sm ${isOnline
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-red-500/20 text-red-400'}`}>
+                    {isOnline ? (
+                        <>
+                            <Wifi className="h-4 w-4" />
+                            <span>Connecte</span>
+                        </>
+                    ) : (
+                        <>
+                            <WifiOff className="h-4 w-4" />
+                            <span>Hors ligne</span>
+                        </>
+                    )}
+                </div>
+            </div>
+            <div className="flex items-center gap-2 md:gap-4">
+                <button onClick={refreshSensorData} disabled={isLoadingSensors} className="rounded-lg bg-slate-700/50 p-2 text-slate-400 transition-all hover:bg-slate-600/50 hover:text-white disabled:opacity-50" title="Actualiser les donnees">
+                    <RefreshCw className={`h-5 w-5 ${isLoadingSensors ? 'animate-spin' : ''}`} />
+                </button>
+                <button className="relative rounded-lg bg-slate-700/50 p-2 text-slate-400 transition-all hover:bg-slate-600/50 hover:text-white" title="Alertes">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">{unreadCount}</span>}
+                </button>
+                <div className="hidden items-center gap-3 rounded-lg p-2 md:flex">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600">
+                        <User className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                        <div className="text-sm font-medium text-slate-300">{currentUser?.name || 'Utilisateur'}</div>
+                        <div className="text-xs capitalize text-slate-500">{currentUser?.role || 'farmer'}</div>
+                    </div>
+                </div>
+                <button onClick={logout} className="rounded-lg bg-slate-700/50 p-2 text-slate-400 transition-all hover:bg-red-500/20 hover:text-red-200" title="Deconnexion">
+                    <LogOut className="h-5 w-5" />
+                </button>
+            </div>
+        </header>
+    );
 };
 export default Header;

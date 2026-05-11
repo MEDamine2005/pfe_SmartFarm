@@ -1,9 +1,50 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
+import { useApp } from './context/AppContext';
 import { Layout } from './components/layout';
-import { Dashboard, SensorsPage, IrrigationPage, WeatherPage, ChatPage, SettingsPage } from './pages';
+import {
+    AdminIotPage,
+    AdminIrrigationPage,
+    AdminReportsPage,
+    AdminUsersPage,
+    Dashboard,
+    SensorsPage,
+    IrrigationPage,
+    WeatherPage,
+    ChatPage,
+    SettingsPage,
+    LoginPage
+} from './pages';
+
+const AdminOnly = ({ children }) => {
+    const { currentUser } = useApp();
+    if (currentUser?.role !== 'admin') {
+        return <Navigate to="/" replace />;
+    }
+    return children;
+};
+
 function App() {
-    return (_jsx(AppProvider, { children: _jsx(BrowserRouter, { children: _jsx(Routes, { children: _jsxs(Route, { path: "/", element: _jsx(Layout, {}), children: [_jsx(Route, { index: true, element: _jsx(Dashboard, {}) }), _jsx(Route, { path: "sensors", element: _jsx(SensorsPage, {}) }), _jsx(Route, { path: "irrigation", element: _jsx(IrrigationPage, {}) }), _jsx(Route, { path: "weather", element: _jsx(WeatherPage, {}) }), _jsx(Route, { path: "chat", element: _jsx(ChatPage, {}) }), _jsx(Route, { path: "settings", element: _jsx(SettingsPage, {}) })] }) }) }) }));
+    return (
+        <AppProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<Dashboard />} />
+                        <Route path="sensors" element={<SensorsPage />} />
+                        <Route path="irrigation" element={<IrrigationPage />} />
+                        <Route path="weather" element={<WeatherPage />} />
+                        <Route path="chat" element={<ChatPage />} />
+                        <Route path="settings" element={<SettingsPage />} />
+                        <Route path="admin" element={<AdminOnly><AdminReportsPage /></AdminOnly>} />
+                        <Route path="admin/users" element={<AdminOnly><AdminUsersPage /></AdminOnly>} />
+                        <Route path="admin/iot" element={<AdminOnly><AdminIotPage /></AdminOnly>} />
+                        <Route path="admin/irrigation" element={<AdminOnly><AdminIrrigationPage /></AdminOnly>} />
+                    </Route>
+                </Routes>
+            </BrowserRouter>
+        </AppProvider>
+    );
 }
 export default App;

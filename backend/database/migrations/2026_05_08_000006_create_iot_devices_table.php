@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('SystemeIoT', function (Blueprint $table) {
+            $table->id();
+            $table->string('arduino_id');
+            $table->string('esp8266_id');
+            $table->string('etat');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('SystemeIoT');
+    }
+};
