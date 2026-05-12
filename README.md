@@ -174,6 +174,59 @@ php artisan test
 
 ---
 
+## Captures d'ecran du systeme
+
+### Espace Agriculteur
+
+#### Login
+![Login agriculteur](screen_shote/farmer/loginpage.png)
+
+#### Tableau de bord
+![Tableau de bord agriculteur](screen_shote/farmer/table_de_bord.png)
+![Tableau de bord agriculteur 1](screen_shote/farmer/table_de_bord1.png)
+![Tableau de bord agriculteur 2](screen_shote/farmer/table_de_board2.png)
+
+#### Capteurs
+![Page capteurs 1](screen_shote/farmer/page_capteurs1.png)
+![Page capteurs 2](screen_shote/farmer/page_capteurs2.png)
+
+#### Irrigation
+![Irrigation agriculteur 1](screen_shote/farmer/irrigation1.png)
+![Irrigation agriculteur 2](screen_shote/farmer/irrigation2.png)
+
+#### Meteo
+![Meteo agriculteur](screen_shote/farmer/meteo.png)
+![Meteo agriculteur 1](screen_shote/farmer/meteo1.png)
+![Meteo agriculteur 2](screen_shote/farmer/meteo2.png)
+
+#### Chat IA
+![Chat IA agriculteur](screen_shote/farmer/CHATia.png)
+![Chat IA agriculteur 1](screen_shote/farmer/CHATia1.png)
+![Chat IA agriculteur 2](screen_shote/farmer/CHATia2.png)
+
+#### Parametres
+![Parametres agriculteur](screen_shote/farmer/parametre.png)
+![Parametres agriculteur 1](screen_shote/farmer/parametre1.png)
+
+### Espace Administrateur
+
+#### Gestion des utilisateurs
+![Gestion utilisateurs](screen_shote/admin/utilisateure.png)
+
+#### Systeme IoT
+![Systeme IoT](screen_shote/admin/iot.png)
+![Donnees IoT](screen_shote/admin/donnes_iot.png)
+![Donnees IoT 1](screen_shote/admin/donnes_iot1.png)
+![Donnees IoT 2](screen_shote/admin/donner_iot2.png)
+
+#### Irrigation automatique
+![Irrigation automatique admin](screen_shote/admin/irrigation_auto.png)
+
+#### Rapports
+![Rapports admin](screen_shote/admin/rapport.png)
+
+---
+
 ## 👨‍💻 Auteur
 
 - **MOHAMED AMINE KERMOUNE**
