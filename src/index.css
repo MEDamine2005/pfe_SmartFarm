@@ -219,3 +219,126 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .recharts-cartesian-grid-vertical line {
   stroke: theme('colors.slate.700');
 }
+
+/* React Toastify — Smart Farm theme */
+.sf-toast-container {
+  width: min(420px, calc(100vw - 2rem));
+  padding: 0.75rem;
+  z-index: 9999;
+}
+
+.sf-toast-container .Toastify__toast {
+  font-family: 'Inter', system-ui, sans-serif;
+  border-radius: 1rem;
+  border: 1px solid rgb(51 65 85 / 0.6);
+  background: rgb(15 23 42 / 0.95);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 40px rgb(0 0 0 / 0.35);
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.625rem;
+  color: #f8fafc;
+}
+
+.sf-toast-container .Toastify__toast--success {
+  border-color: rgb(16 185 129 / 0.45);
+}
+
+.sf-toast-container .Toastify__toast--error {
+  border-color: rgb(239 68 68 / 0.45);
+}
+
+.sf-toast-container .Toastify__toast--warning {
+  border-color: rgb(245 158 11 / 0.45);
+}
+
+.sf-toast-container .Toastify__toast--info {
+  border-color: rgb(59 130 246 / 0.45);
+}
+
+.sf-toast.sf-toast--critical,
+.sf-toast.sf-toast--danger {
+  border-color: rgb(239 68 68 / 0.5);
+}
+
+.sf-toast.sf-toast--warning {
+  border-color: rgb(245 158 11 / 0.5);
+}
+
+.sf-toast.sf-toast--info {
+  border-color: rgb(59 130 246 / 0.5);
+}
+
+.sf-toast-progress {
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+}
+
+.sf-toast-container .Toastify__close-button {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.sf-toast-container .Toastify__close-button:hover {
+  color: #f8fafc;
+}
+
+.sf-alert-toast {
+  min-width: 260px;
+}
+
+.sf-alert-toast__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.sf-alert-toast__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.sf-alert-toast__time {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.sf-alert-toast__message {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.sf-alert-toast__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.sf-alert-toast__btn {
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  background: rgb(255 255 255 / 0.08);
+  transition: background 0.2s;
+}
+
+.sf-alert-toast__btn:hover {
+  background: rgb(255 255 255 / 0.16);
+}
+
+.sf-alert-toast__btn--primary {
+  color: #ecfdf5;
+  background: rgb(16 185 129 / 0.25);
+}
+
+.sf-alert-toast__btn--primary:hover {
+  background: rgb(16 185 129 / 0.4);
+}

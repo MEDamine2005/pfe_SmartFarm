@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('SystemeIoT', function (Blueprint $table) {
             $table->id();
-            $table->string('arduino_id');
-            $table->string('esp8266_id');
+            $table->string('device_id')->unique();
+            $table->string('module')->default('ESP-12E 8266');
             $table->string('etat');
         });
     }

@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, LogOut, RefreshCw, User, Wifi, WifiOff } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { notify } from '../../utils/toast';
 const Header = () => {
+    const navigate = useNavigate();
     const { alerts, refreshSensorData, isLoadingSensors, currentUser, logout } = useApp();
     const unreadCount = alerts.filter(a => !a.read).length;
     const [isOnline] = React.useState(true);
@@ -31,7 +34,22 @@ const Header = () => {
                 <button onClick={refreshSensorData} disabled={isLoadingSensors} className="rounded-lg bg-slate-700/50 p-2 text-slate-400 transition-all hover:bg-slate-600/50 hover:text-white disabled:opacity-50" title="Actualiser les donnees">
                     <RefreshCw className={`h-5 w-5 ${isLoadingSensors ? 'animate-spin' : ''}`} />
                 </button>
-                <button className="relative rounded-lg bg-slate-700/50 p-2 text-slate-400 transition-all hover:bg-slate-600/50 hover:text-white" title="Alertes">
+                <button
+                    type="button"
+                    onClick={() => {
+                        navigate('/');
+                        if (unreadCount > 0) {
+                            notify.info(
+                                unreadCount === 1
+                                    ? '1 alerte non lue — voir le tableau de bord'
+                                    : `${unreadCount} alertes non lues — voir le tableau de bord`,
+                                { toastId: 'header-alerts-hint' },
+                            );
+                        }
+                    }}
+                    className="relative rounded-lg bg-slate-700/50 p-2 text-slate-400 transition-all hover:bg-slate-600/50 hover:text-white"
+                    title="Alertes"
+                >
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">{unreadCount}</span>}
                 </button>

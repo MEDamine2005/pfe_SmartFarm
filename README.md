@@ -174,6 +174,110 @@ php artisan test
 
 ---
 
+## Lancement complet Web + Backend + Maquette IoT
+
+### 1. Backend Laravel
+
+```bash
+cd backend
+composer install
+php artisan key:generate
+php artisan migrate:fresh --seed
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+Important dans `backend/.env` :
+
+```env
+APP_URL=http://localhost:8000
+DB_DATABASE=smart_farm
+DB_USERNAME=root
+DB_PASSWORD=
+IOT_DEVICE_KEY=smart-farm-iot-2026
+```
+
+Comptes demo :
+
+- `farmer@smartfarm.local` / `1234`
+- `admin@smartfarm.local` / `1234`
+
+### 2. Frontend React
+
+Dans un autre terminal :
+
+```bash
+npm install
+npm run dev
+```
+
+Si besoin, cree `.env` dans la racine du projet :
+
+```env
+VITE_API_URL=http://127.0.0.1:8000/api
+```
+
+Ouvre ensuite l'application sur l'URL Vite affichee, generalement :
+
+```text
+http://localhost:5173
+```
+
+### 3. Code ESP-12E 8266
+
+Le code ESP-12E 8266 pret pour la maquette se trouve ici :
+
+```text
+arduino/smart_farm_esp12e_8266/smart_farm_esp12e_8266.ino
+```
+
+Avant de televerser, modifie ces valeurs :
+
+```cpp
+const char* ssid = "mart_farm";
+const char* password = "12345678";
+const char* serverName = "http://IP_DE_TON_PC:8000/api/iot/readings";
+```
+
+Pour trouver `IP_DE_TON_PC` sous Windows :
+
+```powershell
+ipconfig
+```
+
+Prends l'adresse `IPv4` de la carte WiFi, par exemple `192.168.43.205`. Le PC et l'ESP-12E doivent etre sur le meme WiFi.
+
+### 4. Branchement de la maquette
+
+| Module | ESP-12E 8266 |
+| --- | --- |
+| DHT22 data | D4 |
+| Relais pompe IN | D5 |
+| Humidite sol AO | A0 |
+| LDR digital | D1 |
+| Niveau eau digital | D2 |
+| GND commun | GND ESP + GND alimentation capteurs |
+
+Notes importantes :
+
+- ESP-12E doit etre alimente correctement selon ta carte: beaucoup de cartes NodeMCU acceptent `5V USB`, mais la puce travaille en `3.3V`.
+- Le relais dans ce code est active avec `LOW` et desactive avec `HIGH`.
+- Lance Laravel avec `--host=0.0.0.0` pour que l'ESP-12E puisse joindre ton PC.
+- Si Windows Firewall demande une autorisation pour PHP/Laravel, accepte le reseau prive.
+
+### 5. Test rapide sans ESP
+
+Tu peux tester l'endpoint IoT depuis le PC :
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/iot/readings ^
+  -H "Content-Type: application/json" ^
+  -d "{\"temperature\":27.5,\"humidite_air\":60,\"humidite_sol\":35,\"luminosite\":1,\"niveau_eau\":1}"
+```
+
+Si la reponse contient `readings_saved`, la liaison backend IoT est correcte.
+
+---
+
 ## Captures d'ecran du systeme
 
 ### Espace Agriculteur

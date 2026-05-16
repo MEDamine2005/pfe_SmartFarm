@@ -86,8 +86,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         SystemeIoT::create([
-            'arduino_id' => 'ARD-001',
-            'esp8266_id' => 'ESP-001',
+            'device_id' => 'ESP-12E-8266',
+            'module' => 'ESP-12E 8266',
             'etat' => 'online',
         ]);
 

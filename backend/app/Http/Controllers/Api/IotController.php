@@ -17,8 +17,7 @@ class IotController extends Controller
         $this->authorizeDevice($request);
 
         $data = $request->validate([
-            'arduino_id' => ['required', 'string', 'max:255'],
-            'esp8266_id' => ['required', 'string', 'max:255'],
+            'device_id' => ['nullable', 'string', 'max:255'],
             'temperature' => ['required', 'numeric'],
             'humidite_air' => ['required', 'numeric'],
             'humidite_sol' => ['required', 'numeric'],
@@ -28,11 +27,8 @@ class IotController extends Controller
         ]);
 
         SystemeIoT::updateOrCreate(
-            [
-                'arduino_id' => $data['arduino_id'],
-                'esp8266_id' => $data['esp8266_id'],
-            ],
-            ['etat' => 'online'],
+            ['device_id' => $data['device_id'] ?? 'ESP-12E-8266'],
+            ['module' => 'ESP-12E 8266', 'etat' => 'online'],
         );
 
         $timestamp = now();
@@ -119,6 +115,10 @@ class IotController extends Controller
     {
         $configuredKey = (string) config('iot.device_key');
         $deviceKey = (string) $request->header('X-IOT-KEY', $request->input('iot_key', ''));
+
+        if ($deviceKey === '' && config('app.env') === 'local') {
+            return;
+        }
 
         abort_unless($configuredKey !== '' && hash_equals($configuredKey, $deviceKey), 401, 'Invalid IoT key.');
     }

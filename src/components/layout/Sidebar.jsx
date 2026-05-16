@@ -5,7 +5,6 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  Cloud,
   Droplets,
   Home,
   MessageSquare,
@@ -20,7 +19,6 @@ const farmerItems = [
   { path: "/", icon: Home, label: "Tableau de bord" },
   { path: "/sensors", icon: Activity, label: "Capteurs" },
   { path: "/irrigation", icon: Droplets, label: "Irrigation" },
-  { path: "/weather", icon: Cloud, label: "Meteo" },
   { path: "/chat", icon: MessageSquare, label: "Chat IA" },
   { path: "/settings", icon: Settings, label: "Parametres" },
 ];

@@ -26,6 +26,7 @@ Route::middleware('api.token')->group(function () {
     Route::post('/capteurs', [SensorController::class, 'store']);
 
     Route::get('/weather', [WeatherController::class, 'latest']);
+    Route::get('/weather/history', [WeatherController::class, 'history']);
     Route::post('/weather', [WeatherController::class, 'store']);
     Route::get('/donnerMeteo', [WeatherController::class, 'latest']);
     Route::post('/donnerMeteo', [WeatherController::class, 'store']);

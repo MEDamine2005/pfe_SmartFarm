@@ -1,18 +1,21 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
+  apiLogin,
+  apiLogout,
   controlIrrigation,
+  deleteAlert,
+  fetchAlerts,
+  fetchChatMessages,
   fetchIrrigationState,
   fetchSensorData,
   fetchWeatherData,
-  getAIResponse,
-} from "../services/mockData";
+  hasApiToken,
+  markAlertRead as apiMarkAlertRead,
+  sendChatMessage,
+} from "../services/api";
+import { areNotificationsEnabled, notify, showAlertToast } from "../utils/toast";
 
 const AppContext = createContext(undefined);
-
-const demoUsers = [
-  { id: "farmer-1", name: "Fermier", email: "farmer@smartfarm.local", role: "farmer" },
-  { id: "admin-1", name: "Admin", email: "admin@smartfarm.local", role: "admin" },
-];
 
 export const useApp = () => {
   const context = useContext(AppContext);
@@ -25,75 +28,61 @@ export const useApp = () => {
 export const AppProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = window.localStorage.getItem("smartFarmUser");
-    return saved ? JSON.parse(saved) : null;
+    return saved && hasApiToken() ? JSON.parse(saved) : null;
   });
   const [sensorData, setSensorData] = useState(null);
-  const [isLoadingSensors, setIsLoadingSensors] = useState(true);
+  const [isLoadingSensors, setIsLoadingSensors] = useState(Boolean(currentUser));
   const [weatherData, setWeatherData] = useState(null);
-  const [isLoadingWeather, setIsLoadingWeather] = useState(true);
+  const [isLoadingWeather, setIsLoadingWeather] = useState(Boolean(currentUser));
   const [irrigationState, setIrrigationState] = useState(null);
   const [isIrrigating, setIsIrrigating] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [timeRange, setTimeRange] = useState("24h");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [chatMessages, setChatMessages] = useState([
-    {
-      id: "1",
-      role: "bot",
-      content:
-        "Bonjour! Je suis votre assistant Smart Farm. Je peux vous aider avec les capteurs, l'irrigation, la météo et les recommandations.",
-      timestamp: new Date(),
-      actions: [
-        { label: "Etat irrigation", action: "irrigation_status", icon: "droplets" },
-        { label: "Meteo", action: "weather", icon: "cloud" },
-        { label: "Sol", action: "soil_status", icon: "thermometer" },
-      ],
-    },
-  ]);
-  const [alerts, setAlerts] = useState([
-    {
-      id: "1",
-      type: "warning",
-      title: "Humidite du sol basse",
-      message: "L'humidite du sol est descendue a 35%. Une irrigation pourrait etre necessaire.",
-      timestamp: new Date(Date.now() - 3600000),
-      read: false,
-    },
-    {
-      id: "2",
-      type: "info",
-      title: "Previsions meteo",
-      message: "Une pluie legere est prevue dans 3 jours. Envisagez de reporter l'irrigation.",
-      timestamp: new Date(Date.now() - 7200000),
-      read: true,
-    },
-  ]);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const knownAlertIdsRef = useRef(new Set());
+  const alertsBootstrappedRef = useRef(false);
 
-  const login = async ({ email, password, role }) => {
-    await new Promise((resolve) => setTimeout(resolve, 350));
-    const user =
-      demoUsers.find((item) => item.email.toLowerCase() === email.toLowerCase()) ||
-      demoUsers.find((item) => item.role === role) ||
-      demoUsers[0];
-
-    if (!password || password.length < 4) {
-      throw new Error("Mot de passe invalide");
+  const login = async ({ email, password }) => {
+    try {
+      const user = await apiLogin({ email, password });
+      setCurrentUser(user);
+      window.localStorage.setItem("smartFarmUser", JSON.stringify(user));
+      notify.success(`Bienvenue, ${user.name}`);
+      return user;
+    } catch (error) {
+      notify.error(error.message || "Connexion impossible");
+      throw error;
     }
-
-    setCurrentUser(user);
-    window.localStorage.setItem("smartFarmUser", JSON.stringify(user));
-    return user;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await apiLogout().catch(() => undefined);
     setCurrentUser(null);
+    setSensorData(null);
+    setWeatherData(null);
+    setIrrigationState(null);
+    setAlerts([]);
+    setChatMessages([]);
+    knownAlertIdsRef.current = new Set();
+    alertsBootstrappedRef.current = false;
     window.localStorage.removeItem("smartFarmUser");
+    notify.info("Deconnexion reussie");
   };
 
-  const refreshSensorData = async () => {
+  const refreshSensorData = async ({ silent = false } = {}) => {
     setIsLoadingSensors(true);
     try {
       setSensorData(await fetchSensorData());
+      if (!silent) {
+        notify.success("Donnees capteurs actualisees");
+      }
+    } catch (error) {
+      setSensorData(null);
+      if (!silent) {
+        notify.error("Impossible de charger les capteurs");
+      }
     } finally {
       setIsLoadingSensors(false);
     }
@@ -103,26 +92,87 @@ export const AppProvider = ({ children }) => {
     setIsLoadingWeather(true);
     try {
       setWeatherData(await fetchWeatherData());
+    } catch (error) {
+      setWeatherData(null);
     } finally {
       setIsLoadingWeather(false);
     }
   };
 
+  const syncAlerts = useCallback(async (isInitial = false) => {
+    try {
+      const nextAlerts = await fetchAlerts();
+      const knownIds = knownAlertIdsRef.current;
+      const newAlerts = nextAlerts.filter((alert) => !knownIds.has(alert.id));
+
+      knownAlertIdsRef.current = new Set(nextAlerts.map((alert) => alert.id));
+      setAlerts(nextAlerts);
+
+      if (!areNotificationsEnabled()) {
+        return;
+      }
+
+      const toastHandlers = {
+        onMarkRead: (id) => {
+          apiMarkAlertRead(id).catch(() => undefined);
+          setAlerts((prev) => prev.map((alert) => (alert.id === id ? { ...alert, read: true } : alert)));
+          notify.dismiss(`alert-${id}`);
+        },
+        onDismiss: (id) => {
+          deleteAlert(id).catch(() => undefined);
+          setAlerts((prev) => prev.filter((alert) => alert.id !== id));
+          notify.dismiss(`alert-${id}`);
+        },
+      };
+
+      if (isInitial && !alertsBootstrappedRef.current) {
+        alertsBootstrappedRef.current = true;
+        const unreadCount = nextAlerts.filter((alert) => !alert.read).length;
+        if (unreadCount > 0) {
+          notify.info(
+            unreadCount === 1
+              ? "1 alerte en attente sur le tableau de bord"
+              : `${unreadCount} alertes en attente sur le tableau de bord`,
+            { toastId: "alerts-summary" },
+          );
+        }
+        return;
+      }
+
+      newAlerts
+        .filter((alert) => !alert.read)
+        .forEach((alert) => showAlertToast(alert, toastHandlers));
+    } catch (error) {
+      if (isInitial) {
+        setAlerts([]);
+      }
+    }
+  }, []);
+
   const toggleIrrigation = async () => {
     const nextIsIrrigating = !isIrrigating;
     setIsIrrigating(nextIsIrrigating);
     try {
-      setIrrigationState(await controlIrrigation(nextIsIrrigating ? "start" : "stop"));
+      const nextState = await controlIrrigation(nextIsIrrigating ? "start" : "stop");
+      setIrrigationState(nextState);
+      notify.success(nextIsIrrigating ? "Irrigation demarree" : "Irrigation arretee");
     } catch (error) {
       setIsIrrigating(!nextIsIrrigating);
+      notify.error("Commande irrigation echouee");
       throw error;
     }
   };
 
   const setIrrigationMode = async (mode) => {
-    const nextState = await controlIrrigation(mode === "automatic" ? "auto" : "stop");
-    setIrrigationState({ ...nextState, mode });
-    setIsIrrigating(nextState.status === "on");
+    try {
+      const nextState = await controlIrrigation(mode === "automatic" ? "auto" : "stop");
+      setIrrigationState({ ...nextState, mode });
+      setIsIrrigating(nextState.status === "on");
+      notify.success(mode === "automatic" ? "Mode automatique active" : "Mode manuel active");
+    } catch (error) {
+      notify.error("Impossible de changer le mode irrigation");
+      throw error;
+    }
   };
 
   const sendMessage = async (message) => {
@@ -135,36 +185,69 @@ export const AppProvider = ({ children }) => {
     setChatMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const answer = getAIResponse(message);
-    setChatMessages((prev) => [
-      ...prev,
-      {
-        id: (Date.now() + 1).toString(),
-        role: "bot",
-        content: answer.response,
-        actions: answer.actions,
-        timestamp: new Date(),
-      },
-    ]);
-    setIsTyping(false);
+    try {
+      const answer = await sendChatMessage(message);
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "bot",
+          content: answer.response,
+          actions: answer.actions,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (error) {
+      notify.warning("Assistant IA indisponible");
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "bot",
+          content: "Connexion au backend impossible.",
+          actions: [],
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const markAlertRead = (id) => {
+    apiMarkAlertRead(id).catch(() => undefined);
     setAlerts((prev) => prev.map((alert) => (alert.id === id ? { ...alert, read: true } : alert)));
+    notify.dismiss(`alert-${id}`);
   };
 
   const dismissAlert = (id) => {
+    deleteAlert(id).catch(() => undefined);
     setAlerts((prev) => prev.filter((alert) => alert.id !== id));
+    notify.dismiss(`alert-${id}`);
+    notify.info("Alerte ignoree");
   };
 
   useEffect(() => {
-    refreshSensorData();
+    if (!currentUser) {
+      setIsLoadingSensors(false);
+      setIsLoadingWeather(false);
+      return undefined;
+    }
+
+    refreshSensorData({ silent: true });
     refreshWeatherData();
-    fetchIrrigationState().then(setIrrigationState);
-    const interval = setInterval(refreshSensorData, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    fetchIrrigationState().then(setIrrigationState).catch(() => setIrrigationState(null));
+    syncAlerts(true);
+    fetchChatMessages().then(setChatMessages).catch(() => setChatMessages([]));
+
+    const sensorInterval = setInterval(() => refreshSensorData({ silent: true }), 30000);
+    const alertInterval = setInterval(() => syncAlerts(false), 45000);
+
+    return () => {
+      clearInterval(sensorInterval);
+      clearInterval(alertInterval);
+    };
+  }, [currentUser?.id, syncAlerts]);
 
   const value = {
     currentUser,
@@ -187,6 +270,7 @@ export const AppProvider = ({ children }) => {
     alerts,
     markAlertRead,
     dismissAlert,
+    refreshAlerts: syncAlerts,
     timeRange,
     setTimeRange,
     sidebarCollapsed,

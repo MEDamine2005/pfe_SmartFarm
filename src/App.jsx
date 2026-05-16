@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
+import AppToastContainer from './components/ui/AppToastContainer';
 import { AppProvider } from './context/AppContext';
 import { useApp } from './context/AppContext';
 import { Layout } from './components/layout';
@@ -10,7 +11,6 @@ import {
     Dashboard,
     SensorsPage,
     IrrigationPage,
-    WeatherPage,
     ChatPage,
     SettingsPage,
     LoginPage
@@ -18,7 +18,7 @@ import {
 
 const AdminOnly = ({ children }) => {
     const { currentUser } = useApp();
-    if (currentUser?.role !== 'admin') {
+    if (!['admin', 'administrateur'].includes(currentUser?.role)) {
         return <Navigate to="/" replace />;
     }
     return children;
@@ -28,13 +28,13 @@ function App() {
     return (
         <AppProvider>
             <BrowserRouter>
+                <AppToastContainer />
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/" element={<Layout />}>
                         <Route index element={<Dashboard />} />
                         <Route path="sensors" element={<SensorsPage />} />
                         <Route path="irrigation" element={<IrrigationPage />} />
-                        <Route path="weather" element={<WeatherPage />} />
                         <Route path="chat" element={<ChatPage />} />
                         <Route path="settings" element={<SettingsPage />} />
                         <Route path="admin" element={<AdminOnly><AdminReportsPage /></AdminOnly>} />

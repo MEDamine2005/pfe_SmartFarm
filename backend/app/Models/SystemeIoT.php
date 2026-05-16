@@ -10,5 +10,5 @@ class SystemeIoT extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['arduino_id', 'esp8266_id', 'etat'];
+    protected $fillable = ['device_id', 'module', 'etat'];
 }

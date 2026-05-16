@@ -2,18 +2,19 @@ import React, { useState } from "react";
 import { Activity, Cpu, Database, RefreshCw, Save, Server, Shield, Wifi } from "lucide-react";
 
 const modules = [
-  { name: "Arduino Uno", role: "Microcontroleur", status: "Online", signal: "USB/Serial" },
-  { name: "ESP8266", role: "Module WiFi", status: "Online", signal: "-61 dBm" },
-  { name: "DHT22", role: "Temperature / humidite", status: "Online", signal: "GPIO 2" },
+  { name: "ESP-12E 8266", role: "Microcontroleur WiFi", status: "Online", signal: "WiFi" },
+  { name: "DHT22", role: "Temperature / humidite", status: "Online", signal: "D4" },
   { name: "Soil Moisture", role: "Humidite sol", status: "Online", signal: "A0" },
-  { name: "BH1750", role: "Luminosite", status: "Online", signal: "I2C" },
+  { name: "LDR", role: "Luminosite", status: "Online", signal: "D1" },
+  { name: "Water Level", role: "Niveau eau", status: "Online", signal: "D2" },
+  { name: "Relais pompe", role: "Commande irrigation", status: "Online", signal: "D5" },
 ];
 
 const AdminIotPage = () => {
   const [config, setConfig] = useState({
     interval: 30,
-    endpoint: "https://api.smartfarm.local/iot/readings",
-    apiKey: "SF-DEV-2026",
+    endpoint: "http://192.168.43.205:8000/api/iot/readings",
+    apiKey: "Optionnel en local",
     weatherSync: true,
     alerts: true,
   });
@@ -23,7 +24,7 @@ const AdminIotPage = () => {
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-bold text-white">Systeme IoT</h1>
-          <p className="mt-1 text-slate-400">Configuration Arduino Uno, ESP8266, capteurs et transmission</p>
+          <p className="mt-1 text-slate-400">Configuration ESP-12E 8266, capteurs et transmission WiFi</p>
         </div>
         <button className="flex w-fit items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 font-medium text-white transition hover:bg-emerald-500">
           <Save className="h-4 w-4" />

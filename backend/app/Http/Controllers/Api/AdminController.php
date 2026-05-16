@@ -103,8 +103,8 @@ class AdminController extends Controller
     public function updateDevice(Request $request, SystemeIoT $device)
     {
         $data = $request->validate([
-            'arduino_id' => ['sometimes', 'string', 'max:255'],
-            'esp8266_id' => ['sometimes', 'string', 'max:255'],
+            'device_id' => ['sometimes', 'string', 'max:255'],
+            'module' => ['sometimes', 'string', 'max:255'],
             'etat' => ['sometimes', 'string', 'max:255'],
         ]);
 

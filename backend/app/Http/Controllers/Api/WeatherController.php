@@ -13,6 +13,18 @@ class WeatherController extends Controller
         return response()->json(['data' => DonnerMeteo::latest('timestamp')->first()]);
     }
 
+    public function history(Request $request)
+    {
+        $range = $request->query('range', '24h');
+        $hours = $range === '7d' ? 168 : ($range === '30d' ? 720 : 24);
+
+        return response()->json([
+            'data' => DonnerMeteo::where('timestamp', '>=', now()->subHours($hours))
+                ->orderBy('timestamp')
+                ->get(),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
