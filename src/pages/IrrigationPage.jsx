@@ -1,34 +1,152 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useState, useEffect } from 'react';
-import { Droplets, Calendar, Zap, TrendingUp, History } from 'lucide-react';
-import { useApp } from '../context/AppContext';
-import { IrrigationControl } from '../components/ui';
-import { generateChartData } from '../services/mockData';
+import React, { useEffect, useState } from "react";
+import { Droplets, History, TrendingUp, Zap } from "lucide-react";
+import { useApp } from "../context/AppContext";
+import { IrrigationControl } from "../components/ui";
+import { fetchIrrigationReports, fetchSensorHistory } from "../services/api";
+
 const IrrigationPage = () => {
-    const { irrigationState, isIrrigating, toggleIrrigation, setIrrigationMode } = useApp();
-    const [timeRange, setTimeRange] = useState('7d');
-    const [waterUsageData, setWaterUsageData] = useState([]);
-    const [scheduleTime, setScheduleTime] = useState('06:00');
-    const [scheduleDuration, setScheduleDuration] = useState(15);
-    useEffect(() => {
-        setWaterUsageData(generateChartData(85, 30, timeRange === '24h' ? 24 : 168));
-    }, [timeRange]);
-    const schedulePresets = [
-        { label: 'Matin tôt', time: '06:00', duration: 15 },
-        { label: 'Matin', time: '08:00', duration: 20 },
-        { label: 'Midi', time: '12:00', duration: 10 },
-        { label: 'Soir', time: '18:00', duration: 15 },
-    ];
-    return (_jsxs("div", { className: "space-y-6", children: [_jsxs("div", { className: "flex items-center justify-between", children: [_jsxs("div", { children: [_jsx("h1", { className: "text-3xl font-bold text-white", children: "Irrigation" }), _jsx("p", { className: "text-slate-400 mt-1", children: "Contr\u00F4le et programmation du syst\u00E8me d'arrosage" })] }), _jsx("div", { className: "flex items-center gap-2", children: isIrrigating && (_jsxs("div", { className: "flex items-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-full", children: [_jsx("div", { className: "w-2 h-2 bg-emerald-400 rounded-full animate-ping" }), _jsx("span", { children: "Irrigation active" })] })) })] }), _jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-6", children: [_jsx("div", { className: "lg:col-span-2", children: _jsx(IrrigationControl, { state: irrigationState }) }), _jsxs("div", { className: "space-y-4", children: [_jsxs("div", { className: "bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50", children: [_jsxs("div", { className: "flex items-center gap-3 mb-4", children: [_jsx("div", { className: "w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center", children: _jsx(TrendingUp, { className: "w-5 h-5 text-cyan-400" }) }), _jsx("h3", { className: "text-lg font-semibold text-white", children: "Statistiques" })] }), _jsxs("div", { className: "space-y-4", children: [_jsxs("div", { className: "flex justify-between items-center", children: [_jsx("span", { className: "text-slate-400", children: "Eau \u00E9conomis\u00E9e (mois)" }), _jsxs("span", { className: "text-white font-semibold", children: [irrigationState?.waterSaved ?? 0, " L"] })] }), _jsxs("div", { className: "flex justify-between items-center", children: [_jsx("span", { className: "text-slate-400", children: "R\u00E9duction" }), _jsx("span", { className: "text-emerald-400 font-semibold", children: "23%" })] }), _jsxs("div", { className: "flex justify-between items-center", children: [_jsx("span", { className: "text-slate-400", children: "S\u00E9ances ce mois" }), _jsx("span", { className: "text-white font-semibold", children: "42" })] }), _jsxs("div", { className: "flex justify-between items-center", children: [_jsx("span", { className: "text-slate-400", children: "Dur\u00E9e moyenne" }), _jsx("span", { className: "text-white font-semibold", children: "18 min" })] })] })] }), _jsxs("div", { className: "bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50", children: [_jsxs("div", { className: "flex items-center gap-3 mb-4", children: [_jsx(Droplets, { className: "w-5 h-5 text-blue-400" }), _jsx("h3", { className: "text-lg font-semibold text-white", children: "Consommation" })] }), _jsxs("div", { className: "text-center", children: [_jsx("div", { className: "text-4xl font-bold text-white mb-1", children: "4,280" }), _jsx("div", { className: "text-slate-400", children: "Litres ce mois" })] }), _jsx("div", { className: "mt-4 h-2 bg-slate-700 rounded-full overflow-hidden", children: _jsx("div", { className: "h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full", style: { width: '65%' } }) }), _jsxs("div", { className: "mt-2 flex justify-between text-xs text-slate-500", children: [_jsx("span", { children: "0 L" }), _jsx("span", { children: "Objectif: 6,500 L" })] })] })] })] }), _jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6", children: [_jsxs("div", { className: "bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50", children: [_jsxs("div", { className: "flex items-center gap-3 mb-6", children: [_jsx(Calendar, { className: "w-5 h-5 text-amber-400" }), _jsx("h3", { className: "text-lg font-semibold text-white", children: "Programmation rapide" })] }), _jsx("div", { className: "grid grid-cols-2 gap-3", children: schedulePresets.map((preset) => (_jsxs("button", { onClick: () => {
-                                        setScheduleTime(preset.time);
-                                        setScheduleDuration(preset.duration);
-                                    }, className: `p-4 rounded-xl border transition-all ${scheduleTime === preset.time
-                                        ? 'border-emerald-500 bg-emerald-500/10'
-                                        : 'border-slate-700 hover:border-slate-600'}`, children: [_jsx("div", { className: "text-white font-medium", children: preset.label }), _jsx("div", { className: "text-slate-400 text-sm", children: preset.time })] }, preset.label))) }), _jsxs("div", { className: "mt-6 pt-6 border-t border-slate-700/50", children: [_jsx("h4", { className: "text-sm font-medium text-slate-400 mb-4", children: "Configuration manuelle" }), _jsxs("div", { className: "grid grid-cols-2 gap-4", children: [_jsxs("div", { children: [_jsx("label", { className: "text-sm text-slate-400 mb-2 block", children: "Heure" }), _jsx("input", { type: "time", value: scheduleTime, onChange: (e) => setScheduleTime(e.target.value), className: "w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" })] }), _jsxs("div", { children: [_jsx("label", { className: "text-sm text-slate-400 mb-2 block", children: "Dur\u00E9e (min)" }), _jsx("input", { type: "number", value: scheduleDuration, onChange: (e) => setScheduleDuration(Number(e.target.value)), min: "5", max: "60", className: "w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" })] })] }), _jsxs("button", { className: "mt-4 w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2", children: [_jsx(Calendar, { className: "w-4 h-4" }), "Programmer l'irrigation"] })] })] }), _jsxs("div", { className: "bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50", children: [_jsxs("div", { className: "flex items-center gap-3 mb-6", children: [_jsx(History, { className: "w-5 h-5 text-slate-400" }), _jsx("h3", { className: "text-lg font-semibold text-white", children: "Historique r\u00E9cent" })] }), _jsx("div", { className: "space-y-4", children: [
-                                    { time: 'Aujourd\'hui 06:00', duration: 15, water: 180 },
-                                    { time: 'Hier 06:00', duration: 12, water: 145 },
-                                    { time: 'Il y a 2 jours 18:00', duration: 18, water: 215 },
-                                    { time: 'Il y a 3 jours 08:00', duration: 15, water: 180 },
-                                ].map((item, index) => (_jsxs("div", { className: "flex items-center justify-between p-4 bg-slate-900/50 rounded-xl", children: [_jsxs("div", { className: "flex items-center gap-3", children: [_jsx("div", { className: "w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center", children: _jsx(Droplets, { className: "w-4 h-4 text-emerald-400" }) }), _jsxs("div", { children: [_jsx("div", { className: "text-white font-medium", children: item.time }), _jsxs("div", { className: "text-sm text-slate-400", children: [item.duration, " min"] })] })] }), _jsx("div", { className: "text-right", children: _jsxs("div", { className: "text-white font-semibold", children: [item.water, " L"] }) })] }, index))) })] })] }), _jsxs("div", { className: "bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50", children: [_jsxs("div", { className: "flex items-center justify-between mb-6", children: [_jsxs("div", { className: "flex items-center gap-3", children: [_jsx(Zap, { className: "w-5 h-5 text-emerald-400" }), _jsx("h3", { className: "text-lg font-semibold text-white", children: "Consommation d'eau" })] }), _jsx("div", { className: "flex bg-slate-900/50 rounded-lg p-1", children: ['24h', '7d', '30d'].map((range) => (_jsx("button", { onClick: () => setTimeRange(range), className: `px-4 py-1.5 rounded-md text-sm font-medium transition-all ${timeRange === range ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`, children: range }, range))) })] }), _jsx("div", { className: "h-64", children: _jsx("div", { className: "flex items-end justify-between h-full gap-2", children: waterUsageData.slice(-14).map((point, index) => (_jsxs("div", { className: "flex-1 flex flex-col items-center gap-2", children: [_jsx("div", { className: "w-full bg-gradient-to-t from-emerald-600 to-cyan-400 rounded-t-lg transition-all hover:from-emerald-500 hover:to-cyan-300", style: { height: `${(point.value / 150) * 100}%` } }), _jsx("span", { className: "text-xs text-slate-500", children: point.time })] }, index))) }) })] })] }));
+  const { irrigationState, isIrrigating } = useApp();
+  const [timeRange, setTimeRange] = useState("7d");
+  const [soilHistory, setSoilHistory] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    Promise.all([fetchSensorHistory(timeRange), fetchIrrigationReports()])
+      .then(([history, irrigationReports]) => {
+        setSoilHistory(history.soil || []);
+        setReports(irrigationReports);
+      })
+      .catch(() => {
+        setSoilHistory([]);
+        setReports([]);
+      })
+      .finally(() => setIsLoading(false));
+  }, [timeRange]);
+
+  const formatReportTime = (report) => {
+    const date = report.date_debut || report.date_fin;
+    if (!date) return "—";
+    return new Date(date).toLocaleString("fr-FR", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Irrigation</h1>
+          <p className="mt-1 text-slate-400">Donnees Laravel API — capteurs et pompe</p>
+        </div>
+        {isIrrigating && (
+          <div className="flex items-center gap-2 rounded-full bg-emerald-500/20 px-4 py-2 text-emerald-400">
+            <div className="h-2 w-2 animate-ping rounded-full bg-emerald-400" />
+            <span>Irrigation active</span>
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <IrrigationControl state={irrigationState} />
+        </div>
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-slate-700/50 bg-slate-800/50 p-6 backdrop-blur-xl">
+            <div className="mb-4 flex items-center gap-3">
+              <TrendingUp className="h-5 w-5 text-cyan-400" />
+              <h3 className="text-lg font-semibold text-white">Reglage actuel</h3>
+            </div>
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Seuil humidite sol</span>
+                <span className="font-semibold text-white">{irrigationState?.threshold ?? "—"}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Duree session</span>
+                <span className="font-semibold text-white">{irrigationState?.duration ?? "—"} min</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Debit pompe</span>
+                <span className="font-semibold text-white">{irrigationState?.flowRate ?? 0} L/min</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Mode</span>
+                <span className="font-semibold capitalize text-emerald-300">{irrigationState?.mode ?? "—"}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="rounded-2xl border border-slate-700/50 bg-slate-800/50 p-6 backdrop-blur-xl">
+          <div className="mb-6 flex items-center gap-3">
+            <History className="h-5 w-5 text-slate-400" />
+            <h3 className="text-lg font-semibold text-white">Historique irrigation (API)</h3>
+          </div>
+          {reports.length === 0 ? (
+            <p className="text-sm text-slate-500">{isLoading ? "Chargement..." : "Aucun rapport enregistre"}</p>
+          ) : (
+            <div className="space-y-3">
+              {reports.map((report) => (
+                <div key={report.id} className="flex items-center justify-between rounded-xl bg-slate-900/50 p-4">
+                  <div>
+                    <div className="font-medium capitalize text-white">{report.type || "irrigation"}</div>
+                    <div className="text-sm text-slate-400">{formatReportTime(report)}</div>
+                  </div>
+                  <Droplets className="h-5 w-5 text-emerald-400" />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-slate-700/50 bg-slate-800/50 p-6 backdrop-blur-xl">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Zap className="h-5 w-5 text-emerald-400" />
+              <h3 className="text-lg font-semibold text-white">Humidite sol (capteurs)</h3>
+            </div>
+            <div className="flex rounded-lg bg-slate-900/50 p-1">
+              {["24h", "7d", "30d"].map((range) => (
+                <button
+                  key={range}
+                  type="button"
+                  onClick={() => setTimeRange(range)}
+                  className={`rounded-md px-3 py-1 text-sm font-medium transition ${
+                    timeRange === range ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {range}
+                </button>
+              ))}
+            </div>
+          </div>
+          {soilHistory.length === 0 ? (
+            <p className="text-sm text-slate-500">{isLoading ? "Chargement..." : "Pas encore de lectures IoT"}</p>
+          ) : (
+            <div className="flex h-56 items-end gap-1">
+              {soilHistory.slice(-20).map((point, index) => (
+                <div key={`${point.time}-${index}`} className="flex flex-1 flex-col items-center gap-1">
+                  <div
+                    className="w-full rounded-t-md bg-gradient-to-t from-emerald-600 to-cyan-400"
+                    style={{ height: `${Math.max(8, point.value)}%` }}
+                    title={`${point.value}%`}
+                  />
+                  <span className="truncate text-[10px] text-slate-500">{point.time}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
 };
+
 export default IrrigationPage;

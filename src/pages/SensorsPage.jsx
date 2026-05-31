@@ -130,4 +130,3 @@ const SensorsPage = () => {
 };
 
 export default SensorsPage;
-

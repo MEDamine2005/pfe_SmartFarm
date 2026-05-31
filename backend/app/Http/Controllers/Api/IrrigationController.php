@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Pompe;
 use App\Models\ReglerIrrigation;
+use App\Models\Repport;
 use Illuminate\Http\Request;
 
 class IrrigationController extends Controller
@@ -48,7 +49,9 @@ class IrrigationController extends Controller
 
     public function events()
     {
-        return response()->json(['data' => ReglerIrrigation::all()]);
+        return response()->json([
+            'data' => Repport::orderByDesc('date_fin')->limit(20)->get(),
+        ]);
     }
 
     private function regle(): ReglerIrrigation

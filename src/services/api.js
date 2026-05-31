@@ -243,6 +243,63 @@ export const markAlertRead = (id) => request(`/alerts/${id}/read`, { method: "PA
 
 export const deleteAlert = (id) => request(`/alerts/${id}`, { method: "DELETE" });
 
+export const fetchIrrigationReports = async () => {
+  const payload = await request("/irrigation/events");
+  return payload.data || [];
+};
+
+export const fetchAdminReports = async () => {
+  const payload = await request("/admin/reports");
+  return payload.data || {};
+};
+
+export const fetchAdminUsers = async () => {
+  const payload = await request("/admin/users");
+  return (payload.data || []).map((user) => ({
+    id: user.id,
+    name: user.email?.split("@")[0] || "Utilisateur",
+    email: user.email,
+    role: normalizeRole(user.role),
+    rawRole: user.role,
+    status: "Actif",
+    lastLogin: "—",
+    phone: user.agriculteur?.phone,
+    ferme_id: user.agriculteur?.ferme_id ?? 1,
+  }));
+};
+
+export const createAdminUser = async ({ email, password, role, phone, ferme_id }) => {
+  const payload = await request("/admin/users", {
+    method: "POST",
+    body: {
+      email,
+      password,
+      role: role === "admin" ? "administrateur" : "agriculteur",
+      phone: phone || "0600000000",
+      ferme_id: ferme_id ?? 1,
+    },
+  });
+  return payload.data;
+};
+
+export const updateAdminUser = async (id, body) => {
+  const payload = await request(`/admin/users/${id}`, {
+    method: "PATCH",
+    body: {
+      ...body,
+      ...(body.role
+        ? { role: body.role === "admin" ? "administrateur" : body.role === "farmer" ? "agriculteur" : body.role }
+        : {}),
+    },
+  });
+  return payload.data;
+};
+
+export const fetchAdminDevices = async () => {
+  const payload = await request("/admin/iot/devices");
+  return payload.data || [];
+};
+
 export const sendChatMessage = async (message) => {
   const payload = await request("/chat", {
     method: "POST",
